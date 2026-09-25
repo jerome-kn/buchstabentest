@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Buchstaben-Merkfähigkeitstest</title>
+
+<style>
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: #f4f5f7;
+    color: #222;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.container {
+    width: 100%;
+    max-width: 650px;
+    padding: 20px;
+}
+
+.card {
+    background: white;
+    border-radius: 18px;
+    padding: 35px;
+    box-shadow: 0 5px 25px rgba(0,0,0,0.08);
+    text-align: center;
+}
+
+h1 {
+    margin-top: 0;
+}
+
+input {
+    width: 100%;
+    padding: 14px;
+    margin: 10px 0;
+    border: 1px solid #ccc;
+    border-radius: 10px;
+    font-size: 17px;
+}
+
+button {
+    border: none;
+    border-radius: 10px;
+    padding: 14px 22px;
+    font-size: 17px;
+    cursor: pointer;
+    background: #222;
+    color: white;
+    margin-top: 10px;
+}
+
+.hidden {
+    display: none;
+}
+
+#letter {
+    font-size: 110px;
+    font-weight: bold;
+    height: 150px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#progress {
+    color: #777;
+}
+
+.result {
+    font-size: 22px;
+    margin: 20px 0;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <!-- START -->
+    <div class="card" id="startScreen">
+
+        <h1>Buchstaben-Merkfähigkeitstest</h1>
+
+        <p>
+            Merke dir die Buchstaben, die nacheinander erscheinen.
+            Danach gibst du sie in der richtigen Reihenfolge ein.
+        </p>
+
+        <input
+            type="text"
+            id="participantId"
+            placeholder="Teilnehmer-ID, z. B. P001"
+        >
+
+        <label>
+            Anzahl der Buchstaben:
+        </label>
+
+        <input
+            type="number"
+            id="length"
+            min="2"
+            max="15"
+            value="5"
+        >
+
+        <label>
+            Anzeigezeit pro Buchstabe (Millisekunden):
+        </label>
+
+        <input
+            type="number"
+            id="speed"
+            min="200"
+            max="3000"
+            step="100"
+            value="800"
+        >
+
+        <button onclick="startTest()">
+            Test starten
+        </button>
+
+    </div>
+
+
+    <!-- TEST -->
+    <div class="card hidden" id="testScreen">
+
+        <h1>Merke dir die Buchstaben</h1>
+
+        <div id="letter">+</div>
+
+        <div id="progress">
+            Bereit...
+        </div>
+
+    </div>
+
+
+    <!-- ANTWORT -->
+    <div class="card hidden" id="answerScreen">
+
+        <h1>Was hast du dir gemerkt?</h1>
+
+        <p>
+            Gib die Buchstaben in der richtigen Reihenfolge ein.
+        </p>
+
+        <input
+            type="text"
+            id="answer"
+            placeholder="z. B. ABDXQ"
+            autocomplete="off"
+        >
+
+        <button onclick="checkAnswer()">
+            Antwort überprüfen
+        </button>
+
+    </div>
+
+
+    <!-- ERGEBNIS -->
+    <div class="card hidden" id="resultScreen">
+
+        <h1>Ergebnis</h1>
+
+        <div class="result" id="resultText"></div>
+
+        <p id="details"></p>
+
+        <p>
+            Dein Ergebnis wurde gespeichert.
+        </p>
+
+        <button onclick="location.reload()">
+            Neue Runde
+        </button>
+
+    </div>
+
+</div>
+
+
+<script>
+
+/* =====================================================
+   GOOGLE APPS SCRIPT URL
+   ===================================================== */
+
+const GOOGLE_SCRIPT_URL =
+    "HIER_DEINE_APPS_SCRIPT_URL_EINTRAGEN";
+
+
+let sequence = "";
+let participantId = "";
+let testLength = 5;
+let testSpeed = 800;
+
+
+/* =====================================================
+   ZUFÄLLIGE BUCHSTABEN ERSTELLEN
+   ===================================================== */
+
+function generateSequence(length) {
+
+    const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+
+    let result = "";
+
+    for (let i = 0; i < length; i++) {
+
+        const randomIndex =
+            Math.floor(Math.random() * letters.length);
+
+        result += letters[randomIndex];
+    }
+
+    return result;
+}
+
+
+/* =====================================================
+   TEST STARTEN
+   ===================================================== */
+
+function startTest() {
+
+    participantId =
+        document.getElementById("participantId").value.trim();
+
+    if (participantId === "") {
+
+        alert("Bitte gib eine Teilnehmer-ID ein.");
+
+        return;
+    }
+
+    testLength =
+        parseInt(document.getElementById("length").value);
+
+    testSpeed =
+        parseInt(document.getElementById("speed").value);
+
+    sequence = generateSequence(testLength);
+
+    document
+        .getElementById("startScreen")
+        .classList.add("hidden");
+
+    document
+        .getElementById("testScreen")
+        .classList.remove("hidden");
+
+    showLetters();
+}
+
+
+/* =====================================================
+   BUCHSTABEN ANZEIGEN
+   ===================================================== */
+
+function showLetters() {
+
+    const letterElement =
+        document.getElementById("letter");
+
+    const progressElement =
+        document.getElementById("progress");
+
+    let index = 0;
+
+    function showNextLetter() {
+
+        if (index >= sequence.length) {
+
+            letterElement.textContent = "";
+
+            progressElement.textContent =
+                "Fertig!";
+
+            setTimeout(() => {
+
+                document
+                    .getElementById("testScreen")
+                    .classList.add("hidden");
+
+                document
+                    .getElementById("answerScreen")
+                    .classList.remove("hidden");
+
+                document
+                    .getElementById("answer")
+                    .focus();
+
+            }, 700);
+
+            return;
+        }
+
+        letterElement.textContent =
+            sequence[index];
+
+        progressElement.textContent =
+            (index + 1) +
+            " von " +
+            sequence.length;
+
+        setTimeout(() => {
+
+            letterElement.textContent = "";
+
+            index++;
+
+            setTimeout(showNextLetter, 150);
+
+        }, testSpeed);
+    }
+
+    showNextLetter();
+}
+
+
+/* =====================================================
+   ANTWORT AUSWERTEN
+   ===================================================== */
+
+function checkAnswer() {
+
+    const answer =
+        document
+            .getElementById("answer")
+            .value
+            .trim()
+            .toUpperCase();
+
+    if (answer === "") {
+
+        alert("Bitte gib deine Antwort ein.");
+
+        return;
+    }
+
+    let correct = 0;
+
+    for (
+        let i = 0;
+        i < sequence.length;
+        i++
+    ) {
+
+        if (sequence[i] === answer[i]) {
+            correct++;
+        }
+    }
+
+    const percent =
+        Math.round(
+            (correct / sequence.length) * 100
+        );
+
+    document
+        .getElementById("answerScreen")
+        .classList.add("hidden");
+
+    document
+        .getElementById("resultScreen")
+        .classList.remove("hidden");
+
+    document
+        .getElementById("resultText")
+        .textContent =
+            correct +
+            " von " +
+            sequence.length +
+            " Buchstaben richtig";
+
+    document
+        .getElementById("details")
+        .innerHTML =
+            "Deine Antwort: <strong>" +
+            answer +
+            "</strong><br><br>" +
+
+            "Richtige Reihe: <strong>" +
+            sequence +
+            "</strong><br><br>" +
+
+            "Trefferquote: <strong>" +
+            percent +
+            "%</strong>";
+
+    saveResult(
+        answer,
+        correct,
+        percent
+    );
+}
+
+
+/* =====================================================
+   DATEN AN GOOGLE SHEETS SENDEN
+   ===================================================== */
+
+function saveResult(
+    answer,
+    correct,
+    percent
+) {
+
+    const data = {
+
+        participantId: participantId,
+
+        length: testLength,
+
+        speed: testSpeed,
+
+        sequence: sequence,
+
+        answer: answer,
+
+        correct: correct,
+
+        percent: percent
+
+    };
+
+    fetch(
+        GOOGLE_SCRIPT_URL,
+        {
+            method: "POST",
+
+            mode: "no-cors",
+
+            headers: {
+                "Content-Type":
+                    "text/plain;charset=utf-8"
+            },
+
+            body: JSON.stringify(data)
+        }
+    );
+}
+
+</script>
+
+</body>
+</html>
