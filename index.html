@@ -683,9 +683,7 @@ function prepareTrial() {
             "auf dem Bildschirm angezeigt.",
 
         "Fühlen":
-            "Die Versuchsleitung gibt dir die " +
-            "Holzbuchstaben nacheinander. " +
-            "Jeder Buchstabe darf 3 Sekunden " +
+            "Jeder Buchstabe darf 10 Sekunden " +
             "ertastet werden."
     };
 
@@ -826,13 +824,12 @@ async function startTrial() {
         if (mode === "Fühlen") {
 
             letterBox.textContent =
-                String(i + 1);
-
+    sequence[i];
             tactile.textContent =
-                "JETZT Buchstabe " +
-                (i + 1) +
-                " übergeben – " +
-                "3 Sekunden ertasten lassen.";
+    "JETZT Buchstabe " +
+    sequence[i] +
+    " übergeben – " +
+    "10 Sekunden ertasten lassen.";
         }
 
 
