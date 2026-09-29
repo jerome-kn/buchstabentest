@@ -359,7 +359,9 @@ const LETTER_TIME = 3000;
 const TACTILE_TIME = 10000;
     
 const BETWEEN_LETTERS = 1000;
-
+    
+const AUDIO_BETWEEN_LETTERS = 500;
+    
 const BEFORE_ANSWER = 2000;
 
 
@@ -877,8 +879,10 @@ async function startTrial() {
                 "Pause";
 
             await sleep(
-                BETWEEN_LETTERS
-            );
+    mode === "Hören"
+        ? AUDIO_BETWEEN_LETTERS
+        : BETWEEN_LETTERS
+);
         }
     }
 
