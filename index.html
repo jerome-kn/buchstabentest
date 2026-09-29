@@ -311,19 +311,6 @@ button:disabled {
      ZWISCHENSTAND
      ============================== -->
 
-<section class="card hidden" id="nextScreen">
-
-    <h1>Antwort gespeichert</h1>
-
-    <p id="nextInfo"></p>
-
-    <button onclick="prepareTrial()">
-        Nächster Durchgang
-    </button>
-
-</section>
-
-
 <!-- ==============================
      TEST BEENDET
      ============================== -->
@@ -1117,16 +1104,7 @@ function submitAnswer() {
     }
 
 
-    document
-        .getElementById("nextInfo")
-        .textContent =
-            "Durchgang abgeschlossen. " +
-            "Bereit für den nächsten?";
-
-
-    showScreen(
-        "nextScreen"
-    );
+    prepareTrial();
 }
 
 
