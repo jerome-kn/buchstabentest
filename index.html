@@ -812,13 +812,12 @@ async function startTrial() {
 
         if (mode === "Hören") {
 
-            letterBox.textContent =
-                "🔊";
+    letterBox.textContent = "🔊";
 
-            await speakLetter(
-    sequence[i]
-);
-
+    await speakLetter(
+        sequence[i]
+    );
+}
 
         /*
            FÜHLEN
