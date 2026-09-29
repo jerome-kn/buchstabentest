@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Buchstaben-Merkfähigkeitstest</title>
+<title>Buchstaben-Gedächtnistest</title>
 
 <style>
 * {
@@ -13,72 +13,120 @@
 
 body {
     margin: 0;
+    padding: 20px;
     font-family: Arial, sans-serif;
-    background: #f4f5f7;
-    color: #222;
+    background: #f3f5f8;
+    color: #202633;
     min-height: 100vh;
     display: flex;
     justify-content: center;
     align-items: center;
 }
 
-.container {
+.card {
     width: 100%;
     max-width: 650px;
-    padding: 20px;
-}
-
-.card {
     background: white;
     border-radius: 18px;
-    padding: 35px;
-    box-shadow: 0 5px 25px rgba(0,0,0,0.08);
+    padding: 30px;
     text-align: center;
+    box-shadow: 0 5px 25px rgba(0,0,0,0.08);
+}
+
+.hidden {
+    display: none !important;
 }
 
 h1 {
     margin-top: 0;
 }
 
+p {
+    line-height: 1.5;
+}
+
 input {
     width: 100%;
-    padding: 14px;
-    margin: 10px 0;
-    border: 1px solid #ccc;
+    padding: 15px;
+    font-size: 20px;
+    border: 1px solid #bfc7d2;
     border-radius: 10px;
-    font-size: 17px;
+    margin: 12px 0;
 }
 
 button {
-    border: none;
-    border-radius: 10px;
     padding: 14px 22px;
+    margin: 8px 4px;
+    background: #25354d;
+    color: white;
+    border: 0;
+    border-radius: 10px;
     font-size: 17px;
     cursor: pointer;
-    background: #222;
-    color: white;
-    margin-top: 10px;
 }
 
-.hidden {
-    display: none;
+button:hover {
+    background: #405779;
+}
+
+button:disabled {
+    opacity: 0.5;
+    cursor: default;
+}
+
+.mode {
+    display: block;
+    width: 100%;
+    margin: 12px 0;
+    padding: 22px;
+    font-size: 21px;
+}
+
+.secondary {
+    background: #e7ebf1;
+    color: #25354d;
+}
+
+.secondary:hover {
+    background: #d8e0ea;
 }
 
 #letter {
-    font-size: 110px;
-    font-weight: bold;
-    height: 150px;
+    height: 180px;
     display: flex;
     align-items: center;
     justify-content: center;
+    font-size: 110px;
+    font-weight: bold;
 }
 
-#progress {
-    color: #777;
+.muted {
+    color: #697587;
+}
+
+.notice {
+    padding: 14px;
+    background: #eef4fa;
+    border-radius: 10px;
+    line-height: 1.5;
+    margin: 15px 0;
+}
+
+.supervisor {
+    background: #fff3d7;
+    padding: 15px;
+    border-radius: 10px;
+    margin: 15px 0;
+}
+
+.supervisor strong {
+    font-size: 32px;
+    letter-spacing: 8px;
+    overflow-wrap: anywhere;
 }
 
 .result {
-    font-size: 22px;
+    font-size: 24px;
     margin: 20px 0;
 }
 </style>
@@ -86,275 +134,669 @@ button {
 
 <body>
 
-<div class="container">
+<!-- ==============================
+     TEILNEHMER-ID
+     ============================== -->
 
-    <!-- START -->
-    <div class="card" id="startScreen">
+<section class="card" id="loginScreen">
 
-        <h1>Buchstaben-Merkfähigkeitstest</h1>
+    <h1>Buchstaben-Gedächtnistest</h1>
 
-        <p>
-            Merke dir die Buchstaben, die nacheinander erscheinen.
-            Danach gibst du sie in der richtigen Reihenfolge ein.
-        </p>
+    <p>
+        Bitte gib deine anonyme Teilnehmer-ID ein.
+    </p>
 
-        <input
-            type="text"
-            id="participantId"
-            placeholder="Teilnehmer-ID, z. B. P001"
-        >
+    <input
+        id="participantId"
+        placeholder="z. B. P001"
+        maxlength="30"
+        autocomplete="off"
+    >
 
-        <label>
-            Anzahl der Buchstaben:
-        </label>
+    <button onclick="login()">
+        Weiter
+    </button>
 
-        <input
-            type="number"
-            id="length"
-            min="2"
-            max="15"
-            value="5"
-        >
-
-        <label>
-            Anzeigezeit pro Buchstabe (Millisekunden):
-        </label>
-
-        <input
-            type="number"
-            id="speed"
-            min="200"
-            max="3000"
-            step="100"
-            value="800"
-        >
-
-        <button onclick="startTest()">
-            Test starten
-        </button>
-
-    </div>
+</section>
 
 
-    <!-- TEST -->
-    <div class="card hidden" id="testScreen">
+<!-- ==============================
+     TESTAUSWAHL
+     ============================== -->
 
-        <h1>Merke dir die Buchstaben</h1>
+<section class="card hidden" id="menuScreen">
 
-        <div id="letter">+</div>
+    <h1>Test auswählen</h1>
 
-        <div id="progress">
-            Bereit...
-        </div>
+    <p id="welcome"></p>
 
-    </div>
+    <p>
+        Wähle den Sinneskanal, den du testen möchtest.
+    </p>
+
+    <button
+        class="mode"
+        onclick="chooseMode('Sehen')"
+    >
+        👁 Sehtest
+    </button>
+
+    <button
+        class="mode"
+        onclick="chooseMode('Hören')"
+    >
+        🔊 Hörtest
+    </button>
+
+    <button
+        class="mode"
+        onclick="chooseMode('Fühlen')"
+    >
+        ✋ Fühltest
+    </button>
+
+    <p
+        class="muted"
+        id="completedModes"
+    ></p>
+
+</section>
 
 
-    <!-- ANTWORT -->
-    <div class="card hidden" id="answerScreen">
+<!-- ==============================
+     VORBEREITUNG
+     ============================== -->
 
-        <h1>Was hast du dir gemerkt?</h1>
+<section class="card hidden" id="readyScreen">
 
-        <p>
-            Gib die Buchstaben in der richtigen Reihenfolge ein.
-        </p>
+    <h1 id="modeTitle"></h1>
 
-        <input
-            type="text"
-            id="answer"
-            placeholder="z. B. ABDXQ"
-            autocomplete="off"
-        >
+    <p id="trialInfo"></p>
 
-        <button onclick="checkAnswer()">
-            Antwort überprüfen
-        </button>
+    <div
+        class="notice"
+        id="instructions"
+    ></div>
 
-    </div>
-
-
-    <!-- ERGEBNIS -->
-    <div class="card hidden" id="resultScreen">
-
-        <h1>Ergebnis</h1>
-
-        <div class="result" id="resultText"></div>
-
-        <p id="details"></p>
+    <!-- Nur beim Fühltest -->
+    <div
+        class="supervisor hidden"
+        id="supervisorBox"
+    >
 
         <p>
-            Dein Ergebnis wurde gespeichert.
+            <strong>Nur für die Versuchsleitung</strong>
         </p>
 
-        <button onclick="location.reload()">
-            Neue Runde
-        </button>
+        <p>
+            Diese Buchstaben in der angezeigten Reihenfolge
+            bereitlegen. Die Versuchsperson darf sie nicht sehen.
+        </p>
+
+        <strong id="supervisorSequence"></strong>
 
     </div>
 
-</div>
+    <button onclick="startTrial()">
+        Durchgang starten
+    </button>
+
+    <button
+        class="secondary"
+        onclick="showMenu()"
+    >
+        Zurück zur Auswahl
+    </button>
+
+</section>
+
+
+<!-- ==============================
+     PRÄSENTATION
+     ============================== -->
+
+<section class="card hidden" id="testScreen">
+
+    <h1 id="presentationTitle">
+        Merke dir die Buchstaben
+    </h1>
+
+    <div id="letter">
+        +
+    </div>
+
+    <p
+        id="progress"
+        class="muted"
+    >
+        Bereit
+    </p>
+
+    <p
+        id="tactileInstruction"
+        class="hidden"
+    ></p>
+
+</section>
+
+
+<!-- ==============================
+     ANTWORT
+     ============================== -->
+
+<section class="card hidden" id="answerScreen">
+
+    <h1>Deine Antwort</h1>
+
+    <p>
+        Gib die Buchstaben in der richtigen Reihenfolge ein.
+    </p>
+
+    <input
+        id="answer"
+        placeholder="Deine Buchstaben"
+        autocomplete="off"
+        autocapitalize="characters"
+        spellcheck="false"
+    >
+
+    <button onclick="submitAnswer()">
+        Antwort bestätigen
+    </button>
+
+</section>
+
+
+<!-- ==============================
+     ZWISCHENSTAND
+     ============================== -->
+
+<section class="card hidden" id="nextScreen">
+
+    <h1>Antwort gespeichert</h1>
+
+    <p id="nextInfo"></p>
+
+    <button onclick="prepareTrial()">
+        Nächster Durchgang
+    </button>
+
+</section>
+
+
+<!-- ==============================
+     TEST BEENDET
+     ============================== -->
+
+<section class="card hidden" id="finishedScreen">
+
+    <h1>Test beendet</h1>
+
+    <div
+        class="result"
+        id="finishedInfo"
+    ></div>
+
+    <p>
+        Vielen Dank für deine Teilnahme.
+        Deine Daten wurden gespeichert.
+    </p>
+
+    <button onclick="showMenu()">
+        Zurück zur Testauswahl
+    </button>
+
+</section>
 
 
 <script>
 
-/* =====================================================
+/* ==========================================
    GOOGLE APPS SCRIPT URL
-   ===================================================== */
+   ========================================== */
 
 const GOOGLE_SCRIPT_URL =
-    "https://script.google.com/macros/s/AKfycbwoXBGjaiTfTm24uUINI5vM-T7Mf7z6FlxoACAIcHKPLqaxth2Qq5Pl9yehBN6CxhI8qQ/exec";
+"https://script.google.com/macros/s/AKfycbwoXBGjaiTfTm24uUINI5vM-T7Mf7z6FlxoACAIcHKPLqaxth2Qq5Pl9yehBN6CxhI8qQ/exec";
 
+
+/* ==========================================
+   FESTE TESTEINSTELLUNGEN
+   ========================================== */
+
+const MAX_LENGTH = 10;
+
+const REPEATS = 2;
+
+const LETTER_TIME = 3000;
+
+const BETWEEN_LETTERS = 1000;
+
+const BEFORE_ANSWER = 2000;
+
+
+/* ==========================================
+   VARIABLEN
+   ========================================== */
+
+let participantId = "";
+
+let mode = "";
+
+let trialIndex = 0;
 
 let sequence = "";
-let participantId = "";
-let testLength = 5;
-let testSpeed = 800;
+
+let trialStarted = false;
+
+let completed = new Set();
+
+let usedSequences = new Set();
 
 
-/* =====================================================
-   ZUFÄLLIGE BUCHSTABEN ERSTELLEN
-   ===================================================== */
+/*
+   Wie viele Versuche derselben Länge
+   waren hintereinander NICHT vollständig richtig?
+*/
+
+let failedAttempts = 0;
+
+
+/* ==========================================
+   HILFSFUNKTIONEN
+   ========================================== */
+
+function showScreen(id) {
+
+    document
+        .querySelectorAll(".card")
+        .forEach(card => {
+            card.classList.add("hidden");
+        });
+
+    document
+        .getElementById(id)
+        .classList.remove("hidden");
+}
+
+
+function sleep(ms) {
+
+    return new Promise(
+        resolve => setTimeout(resolve, ms)
+    );
+}
+
+
+/* ==========================================
+   LOGIN
+   ========================================== */
+
+function login() {
+
+    const id =
+        document
+            .getElementById("participantId")
+            .value
+            .trim();
+
+    if (
+        !/^[A-Za-z0-9_-]{1,30}$/.test(id)
+    ) {
+
+        alert(
+            "Bitte gib eine gültige Teilnehmer-ID ein."
+        );
+
+        return;
+    }
+
+    participantId = id;
+
+    showMenu();
+}
+
+
+/* ==========================================
+   MENÜ
+   ========================================== */
+
+function showMenu() {
+
+    document
+        .getElementById("welcome")
+        .textContent =
+            "Teilnehmer-ID: " + participantId;
+
+    document
+        .getElementById("completedModes")
+        .textContent =
+            completed.size
+                ? "Abgeschlossen: " +
+                  [...completed].join(", ")
+                : "Noch kein Test abgeschlossen.";
+
+    showScreen("menuScreen");
+}
+
+
+/* ==========================================
+   TEST AUSWÄHLEN
+   ========================================== */
+
+function chooseMode(selectedMode) {
+
+    if (completed.has(selectedMode)) {
+
+        alert(
+            "Dieser Test wurde in dieser Sitzung bereits abgeschlossen."
+        );
+
+        return;
+    }
+
+    mode = selectedMode;
+
+    trialIndex = 0;
+
+    failedAttempts = 0;
+
+    usedSequences = new Set();
+
+    prepareTrial();
+}
+
+
+/* ==========================================
+   AKTUELLE STUFE
+   ========================================== */
+
+function getLength() {
+
+    return Math.floor(
+        trialIndex / REPEATS
+    ) + 1;
+}
+
+
+/* ==========================================
+   AKTUELLER VERSUCH
+   ========================================== */
+
+function getRepeat() {
+
+    return (
+        trialIndex % REPEATS
+    ) + 1;
+}
+
+
+/* ==========================================
+   BUCHSTABENREIHE ERZEUGEN
+   ========================================== */
 
 function generateSequence(length) {
 
-    const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    const letters =
+        "ABCDEFGHJKLMNPRSTUVWXYZ";
 
-    let result = "";
+    let result;
 
-    for (let i = 0; i < length; i++) {
+    do {
 
-        const randomIndex =
-            Math.floor(Math.random() * letters.length);
+        result = "";
 
-        result += letters[randomIndex];
-    }
+        for (
+            let i = 0;
+            i < length;
+            i++
+        ) {
+
+            let next;
+
+            do {
+
+                next =
+                    letters[
+                        Math.floor(
+                            Math.random() *
+                            letters.length
+                        )
+                    ];
+
+            } while (
+                next ===
+                result[result.length - 1]
+            );
+
+            result += next;
+        }
+
+    } while (
+        usedSequences.has(result)
+    );
+
+    usedSequences.add(result);
 
     return result;
 }
 
 
-/* =====================================================
-   TEST STARTEN
-   ===================================================== */
+/* ==========================================
+   VORBEREITUNG
+   ========================================== */
 
-function startTest() {
+function prepareTrial() {
 
-    participantId =
-        document.getElementById("participantId").value.trim();
+    /*
+       Falls 10 Buchstaben geschafft wurden,
+       ist der Test beendet.
+    */
 
-    if (participantId === "") {
+    if (
+        trialIndex >=
+        MAX_LENGTH * REPEATS
+    ) {
 
-        alert("Bitte gib eine Teilnehmer-ID ein.");
+        completed.add(mode);
 
-        return;
-    }
-
-    testLength =
-        parseInt(document.getElementById("length").value);
-
-    testSpeed =
-        parseInt(document.getElementById("speed").value);
-
-    sequence = generateSequence(testLength);
-
-    document
-        .getElementById("startScreen")
-        .classList.add("hidden");
-
-    document
-        .getElementById("testScreen")
-        .classList.remove("hidden");
-
-    showLetters();
-}
-
-
-/* =====================================================
-   BUCHSTABEN ANZEIGEN
-   ===================================================== */
-
-function showLetters() {
-
-    const letterElement =
-        document.getElementById("letter");
-
-    const progressElement =
-        document.getElementById("progress");
-
-    let index = 0;
-
-    function showNextLetter() {
-
-        if (index >= sequence.length) {
-
-            letterElement.textContent = "";
-
-            progressElement.textContent =
-                "Fertig!";
-
-            setTimeout(() => {
-
-                document
-                    .getElementById("testScreen")
-                    .classList.add("hidden");
-
-                document
-                    .getElementById("answerScreen")
-                    .classList.remove("hidden");
-
-                document
-                    .getElementById("answer")
-                    .focus();
-
-            }, 700);
-
-            return;
-        }
-
-        letterElement.textContent =
-            sequence[index];
-
-        progressElement.textContent =
-            (index + 1) +
-            " von " +
-            sequence.length;
-
-        setTimeout(() => {
-
-            letterElement.textContent = "";
-
-            index++;
-
-            setTimeout(showNextLetter, 150);
-
-        }, testSpeed);
-    }
-
-    showNextLetter();
-}
-
-
-/* =====================================================
-   ANTWORT AUSWERTEN
-   ===================================================== */
-
-function checkAnswer() {
-
-    const answer =
         document
-            .getElementById("answer")
-            .value
-            .trim()
-            .toUpperCase();
+            .getElementById("finishedInfo")
+            .textContent =
+                "Du hast den " +
+                mode +
+                "-Test vollständig abgeschlossen.";
 
-    if (answer === "") {
-
-        alert("Bitte gib deine Antwort ein.");
+        showScreen("finishedScreen");
 
         return;
     }
 
-    let correct = 0;
+
+    trialStarted = false;
+
+
+    /*
+       Neue Buchstabenreihe erzeugen
+    */
+
+    sequence =
+        generateSequence(
+            getLength()
+        );
+
+
+    document
+        .getElementById("modeTitle")
+        .textContent =
+            mode + " – Vorbereitung";
+
+
+    document
+        .getElementById("trialInfo")
+        .textContent =
+            "Stufe " +
+            getLength() +
+            " von " +
+            MAX_LENGTH +
+            " · Versuch " +
+            getRepeat() +
+            " von " +
+            REPEATS;
+
+
+    /*
+       Fühltest
+    */
+
+    const supervisorBox =
+        document
+            .getElementById("supervisorBox");
+
+
+    supervisorBox
+        .classList
+        .toggle(
+            "hidden",
+            mode !== "Fühlen"
+        );
+
+
+    document
+        .getElementById("supervisorSequence")
+        .textContent =
+            mode === "Fühlen"
+                ? sequence.split("").join(" ")
+                : "";
+
+
+    /*
+       Anweisungen
+    */
+
+    const instructions = {
+
+        "Sehen":
+            "Die Buchstaben erscheinen " +
+            "nacheinander auf dem Bildschirm. " +
+            "Jeder Buchstabe ist 3 Sekunden " +
+            "sichtbar. Danach gibt es 1 Sekunde " +
+            "Pause. Merke dir die Reihenfolge.",
+
+        "Hören":
+            "Die Buchstaben werden nacheinander " +
+            "vorgelesen. Jeder Buchstabe wird " +
+            "im gleichen Zeitfenster präsentiert. " +
+            "Währenddessen werden keine Buchstaben " +
+            "auf dem Bildschirm angezeigt.",
+
+        "Fühlen":
+            "Die Versuchsleitung gibt dir die " +
+            "Holzbuchstaben nacheinander. " +
+            "Jeder Buchstabe darf 3 Sekunden " +
+            "ertastet werden."
+    };
+
+
+    document
+        .getElementById("instructions")
+        .textContent =
+            instructions[mode];
+
+
+    showScreen("readyScreen");
+}
+
+
+/* ==========================================
+   BUCHSTABE VORLESEN
+   ========================================== */
+
+function speakLetter(letter) {
+
+    if (
+        !("speechSynthesis" in window)
+    ) {
+        return;
+    }
+
+    const utterance =
+        new SpeechSynthesisUtterance(letter);
+
+    utterance.lang = "de-CH";
+
+    utterance.rate = 0.8;
+
+    speechSynthesis.speak(
+        utterance
+    );
+}
+
+
+/* ==========================================
+   TEST STARTEN
+   ========================================== */
+
+async function startTrial() {
+
+    if (trialStarted) {
+        return;
+    }
+
+    trialStarted = true;
+
+    showScreen("testScreen");
+
+
+    const letterBox =
+        document
+            .getElementById("letter");
+
+    const progress =
+        document
+            .getElementById("progress");
+
+    const tactile =
+        document
+            .getElementById("tactileInstruction");
+
+
+    tactile
+        .classList
+        .toggle(
+            "hidden",
+            mode !== "Fühlen"
+        );
+
+
+    if (mode === "Fühlen") {
+
+        document
+            .getElementById("presentationTitle")
+            .textContent =
+                "Fühltest";
+
+    } else {
+
+        document
+            .getElementById("presentationTitle")
+            .textContent =
+                "Merke dir die Buchstaben";
+    }
+
+
+    letterBox.textContent = "+";
+
+    progress.textContent = "Bereit";
+
+    tactile.textContent = "";
+
+
+    await sleep(1000);
+
+
+    /*
+       Jeder Buchstabe
+    */
 
     for (
         let i = 0;
@@ -362,86 +804,342 @@ function checkAnswer() {
         i++
     ) {
 
-        if (sequence[i] === answer[i]) {
+        progress.textContent =
+            "Buchstabe " +
+            (i + 1) +
+            " von " +
+            sequence.length;
+
+
+        /*
+           SEHEN
+        */
+
+        if (mode === "Sehen") {
+
+            letterBox.textContent =
+                sequence[i];
+        }
+
+
+        /*
+           HÖREN
+        */
+
+        if (mode === "Hören") {
+
+            letterBox.textContent =
+                "🔊";
+
+            speakLetter(
+                sequence[i]
+            );
+        }
+
+
+        /*
+           FÜHLEN
+        */
+
+        if (mode === "Fühlen") {
+
+            letterBox.textContent =
+                String(i + 1);
+
+            tactile.textContent =
+                "JETZT Buchstabe " +
+                (i + 1) +
+                " übergeben – " +
+                "3 Sekunden ertasten lassen.";
+        }
+
+
+        /*
+           3 Sekunden
+        */
+
+        await sleep(
+            LETTER_TIME
+        );
+
+
+        letterBox.textContent = "";
+
+
+        if (mode === "Fühlen") {
+
+            tactile.textContent =
+                "Buchstabe jetzt wegnehmen.";
+        }
+
+
+        /*
+           1 Sekunde Pause
+        */
+
+        if (
+            i <
+            sequence.length - 1
+        ) {
+
+            progress.textContent =
+                "Pause";
+
+            await sleep(
+                BETWEEN_LETTERS
+            );
+        }
+    }
+
+
+    /*
+       2 Sekunden bis zur Antwort
+    */
+
+    progress.textContent =
+        "Bitte merken …";
+
+    tactile.textContent = "";
+
+
+    await sleep(
+        BEFORE_ANSWER
+    );
+
+
+    document
+        .getElementById("answer")
+        .value = "";
+
+
+    showScreen(
+        "answerScreen"
+    );
+
+
+    document
+        .getElementById("answer")
+        .focus();
+}
+
+
+/* ==========================================
+   ANTWORT AUSWERTEN
+   ========================================== */
+
+function submitAnswer() {
+
+    const answer =
+        document
+            .getElementById("answer")
+            .value
+            .trim()
+            .toUpperCase()
+            .replace(/\s+/g, "");
+
+
+    if (
+        !/^[A-ZÄÖÜ]+$/.test(answer)
+    ) {
+
+        alert(
+            "Bitte gib deine Antwort als Buchstaben ein."
+        );
+
+        return;
+    }
+
+
+    /*
+       Positionen vergleichen
+    */
+
+    let correct = 0;
+
+
+    for (
+        let i = 0;
+        i < sequence.length;
+        i++
+    ) {
+
+        if (
+            answer[i] ===
+            sequence[i]
+        ) {
+
             correct++;
         }
     }
 
+
     const percent =
         Math.round(
-            (correct / sequence.length) * 100
+            correct /
+            sequence.length *
+            100
         );
 
-    document
-        .getElementById("answerScreen")
-        .classList.add("hidden");
+
+    /*
+       Vollständig richtig?
+    */
+
+    const fullyCorrect =
+        answer === sequence;
+
+
+    /*
+       Wenn falsch:
+       Fehlerzähler erhöhen.
+    */
+
+    if (!fullyCorrect) {
+
+        failedAttempts++;
+
+    }
+
+
+    /*
+       Daten für Google Sheets
+    */
+
+    const data = {
+
+        participantId:
+            participantId,
+
+        mode:
+            mode,
+
+        level:
+            getLength(),
+
+        attempt:
+            getRepeat(),
+
+        length:
+            sequence.length,
+
+        sequence:
+            sequence,
+
+        answer:
+            answer,
+
+        correct:
+            correct,
+
+        percent:
+            percent
+    };
+
+
+    /*
+       JEDER Versuch wird gespeichert.
+    */
+
+    saveResult(data);
+
+
+    /*
+       War dies der zweite Versuch
+       dieser Buchstabenlänge?
+    */
+
+    const wasSecondAttempt =
+        getRepeat() === 2;
+
+
+    if (wasSecondAttempt) {
+
+        /*
+           Wenn beide Versuche
+           dieser Länge falsch waren,
+           Test beenden.
+        */
+
+        const stopTest =
+            failedAttempts === 2;
+
+
+        /*
+           Fehlerzähler für nächste
+           Buchstabenlänge zurücksetzen.
+        */
+
+        failedAttempts = 0;
+
+
+        if (stopTest) {
+
+            completed.add(mode);
+
+
+            document
+                .getElementById("finishedInfo")
+                .textContent =
+                    "Danke! Du hast den " +
+                    mode +
+                    "-Test beendet. " +
+                    "Deine Daten wurden gespeichert.";
+
+
+            showScreen(
+                "finishedScreen"
+            );
+
+            return;
+        }
+    }
+
+
+    /*
+       Zum nächsten Versuch
+    */
+
+    trialIndex++;
+
+
+    /*
+       Wenn alle 20 Versuche geschafft
+    */
+
+    if (
+        trialIndex >=
+        MAX_LENGTH * REPEATS
+    ) {
+
+        prepareTrial();
+
+        return;
+    }
+
 
     document
-        .getElementById("resultScreen")
-        .classList.remove("hidden");
-
-    document
-        .getElementById("resultText")
+        .getElementById("nextInfo")
         .textContent =
-            correct +
-            " von " +
-            sequence.length +
-            " Buchstaben richtig";
+            "Durchgang abgeschlossen. " +
+            "Bereit für den nächsten?";
 
-    document
-        .getElementById("details")
-        .innerHTML =
-            "Deine Antwort: <strong>" +
-            answer +
-            "</strong><br><br>" +
 
-            "Richtige Reihe: <strong>" +
-            sequence +
-            "</strong><br><br>" +
-
-            "Trefferquote: <strong>" +
-            percent +
-            "%</strong>";
-
-    saveResult(
-        answer,
-        correct,
-        percent
+    showScreen(
+        "nextScreen"
     );
 }
 
 
-/* =====================================================
-   DATEN AN GOOGLE SHEETS SENDEN
-   ===================================================== */
+/* ==========================================
+   GOOGLE SHEETS
+   ========================================== */
 
-function saveResult(
-    answer,
-    correct,
-    percent
-) {
-
-    const data = {
-
-        participantId: participantId,
-
-        length: testLength,
-
-        speed: testSpeed,
-
-        sequence: sequence,
-
-        answer: answer,
-
-        correct: correct,
-
-        percent: percent
-
-    };
+function saveResult(data) {
 
     fetch(
         GOOGLE_SCRIPT_URL,
         {
+
             method: "POST",
 
             mode: "no-cors",
@@ -451,7 +1149,23 @@ function saveResult(
                     "text/plain;charset=utf-8"
             },
 
-            body: JSON.stringify(data)
+            body:
+                JSON.stringify(data)
+        }
+    )
+    .catch(
+        error => {
+
+            console.error(
+                "Speicherfehler:",
+                error
+            );
+
+            alert(
+                "Die Daten konnten möglicherweise " +
+                "nicht übertragen werden. " +
+                "Bitte informiere die Versuchsleitung."
+            );
         }
     );
 }
