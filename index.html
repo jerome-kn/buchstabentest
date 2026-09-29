@@ -704,14 +704,17 @@ function prepareTrial() {
    BUCHSTABE VORLESEN
    ========================================== */
 
-function speakLetter(letter) {
+async function speakLetter(letter) {
     const audio = new Audio(
         "audio/De-" + letter.toUpperCase() + ".ogg"
     );
 
-    audio.play();
-}
+    await audio.play();
 
+    await new Promise(resolve => {
+        audio.addEventListener("ended", resolve, { once: true });
+    });
+}
 
 /* ==========================================
    TEST STARTEN
@@ -812,10 +815,9 @@ async function startTrial() {
             letterBox.textContent =
                 "🔊";
 
-            speakLetter(
-                sequence[i]
-            );
-        }
+            await speakLetter(
+    sequence[i]
+);
 
 
         /*
