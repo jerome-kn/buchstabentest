@@ -355,7 +355,9 @@ const MAX_LENGTH = 10;
 const REPEATS = 2;
 
 const LETTER_TIME = 3000;
-
+    
+const TACTILE_TIME = 10000;
+    
 const BETWEEN_LETTERS = 1000;
 
 const BEFORE_ANSWER = 2000;
@@ -845,9 +847,11 @@ async function startTrial() {
            3 Sekunden
         */
 
-        await sleep(
-            LETTER_TIME
-        );
+       await sleep(
+    mode === "Fühlen"
+        ? TACTILE_TIME
+        : LETTER_TIME
+);
 
 
         letterBox.textContent = "";
