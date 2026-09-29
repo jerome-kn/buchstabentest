@@ -362,7 +362,7 @@ const BETWEEN_LETTERS = 1000;
     
 const AUDIO_BETWEEN_LETTERS = 500;
     
-const BEFORE_ANSWER = 2000;
+const BEFORE_ANSWER = 1000;
 
 
 /* ==========================================
@@ -862,19 +862,12 @@ async function startTrial() {
         */
 
         if (
-            i <
-            sequence.length - 1
-        ) {
-
-            progress.textContent =
-                "Pause";
-
-            await sleep(
-    mode === "Hören"
-        ? AUDIO_BETWEEN_LETTERS
-        : BETWEEN_LETTERS
-);
-        }
+    i < sequence.length - 1 &&
+    mode === "Fühlen"
+) {
+    progress.textContent = "Pause";
+    await sleep(BETWEEN_LETTERS);
+}
     }
 
 
