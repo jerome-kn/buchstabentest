@@ -528,7 +528,9 @@ function getRepeat() {
 function generateSequence(length) {
 
     const letters =
-        "ABCDEFGHJKLMNPRSTUVWXYZ";
+    mode === "Fühlen"
+        ? "ABCDEFGH IJKLOPQRSTUVXY".replace(/\s/g, "")
+        : "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
     let result;
 
