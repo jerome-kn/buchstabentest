@@ -705,23 +705,11 @@ function prepareTrial() {
    ========================================== */
 
 function speakLetter(letter) {
-
-    if (
-        !("speechSynthesis" in window)
-    ) {
-        return;
-    }
-
-    const utterance =
-        new SpeechSynthesisUtterance(letter);
-
-    utterance.lang = "de-CH";
-
-    utterance.rate = 0.8;
-
-    speechSynthesis.speak(
-        utterance
+    const audio = new Audio(
+        "audio/De-" + letter.toUpperCase() + ".ogg"
     );
+
+    audio.play();
 }
 
 
